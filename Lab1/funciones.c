@@ -2,11 +2,15 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <ctype.h>
-#include <time.h>
+#include <unistd.h>
+
+#include "funciones.h"
+
 int padre(char* linea,char* file,int fd[2],int fd2[2]){
     write(fd[1],linea,sizeof(linea));
-    WAIT(NULL);
+    wait(NULL);
     int respuesta = escrituraArchivo(file,linea,fd2);
 }
 int escrituraArchivo(char* file,char* linea, int fd2[2]){
@@ -49,7 +53,7 @@ void hijo(int fd[2],int fd2[2]){
 
 int checkEtapa1(char linea[60],int pos){
     int respuesta = 0;
-    if(linea[pos]==NULL){
+    if(pos == 60){
         return respuesta;
     }
     if(linea[pos]=='G'){
@@ -63,11 +67,11 @@ int checkEtapa1(char linea[60],int pos){
 
 int checkEtapa2(char linea[60],int pos){
     int respuesta = 0;
-    if(linea[pos]==NULL){
+    if(pos == 60){
         return respuesta;
     }
     if(linea[pos]=='T'){
-        //etapa3
+        return checkEtapa3(linea,pos+1);
     }else if(linea[pos]=='G'){
 
         return checkEtapa2(linea,pos+1);
@@ -80,7 +84,7 @@ int checkEtapa2(char linea[60],int pos){
 
 int checkEtapa3(char linea[60],int pos){
     int respuesta = 0;
-    if(linea[pos]==NULL){
+    if(pos == 60){
         return respuesta;
     }
     if(linea[pos]=='C'){
@@ -97,7 +101,7 @@ int checkEtapa3(char linea[60],int pos){
 
 int checkEtapa4(char linea[60],int pos){
     int respuesta = 1;
-    if(linea[pos]==NULL){
+    if(pos == 60){
         return respuesta;
     }
     if(linea[pos] == 'A' || linea[pos] == 'C' || linea[pos] == 'T' || linea[pos] == 'G' ){

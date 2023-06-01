@@ -1,8 +1,12 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include "funciones.c"
+#include <stdio.h>
+#include <getopt.h>
+#include <string.h>
 #include <sys/wait.h>
+#include <ctype.h>
 #include <unistd.h>
+
+#include "funciones.c"
 
 int main(int argc, char* argv[]){
     char* namefile = argv[0];
@@ -23,7 +27,7 @@ int main(int argc, char* argv[]){
     }
     pid_t pid;
     int bufferPadre;
-    char* bufferHijo; (char *) malloc(sizeof (char)*100);
+    char* bufferHijo = (char *) malloc(sizeof (char)*100);
     char linea[60];
 
     char* namefileSalida = argv[1];
