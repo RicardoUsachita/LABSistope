@@ -9,22 +9,28 @@
 #include "funciones.h"
 int validate(int argc, char * argv[], char input[], char output[]){
     int opt;
-    while((opt = getopt(argc,argv,":bi:o"))!= -1){
+    while((opt = getopt(argc,argv,":i:o:b"))!= -1){
+        printf("Valor opt %d\n",opt);
         switch (opt) {
             case 'i':
+                printf("Case i\n");
                 strcpy(input,optarg);
                 break;
             case 'o':
+                printf("Case 0\n");
                 strcpy(output,optarg);
                 break;
             case 'b':
-                 return 1;
+                printf("Case b\n");
                 break;
             case '?':
+                printf("Case ?\n");
                 printf("Unknown option: %c\n",optopt);
                 break;
             case ':':
+                printf("Case :\n");
                 printf("Missing arg for %c\n",optopt);
+                break;
         }
     }
     return 1;
