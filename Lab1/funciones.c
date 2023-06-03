@@ -7,6 +7,28 @@
 #include <unistd.h>
 
 #include "funciones.h"
+int validate(int argc, char * argv[], char input[], char output[]){
+    int opt;
+    while((opt = getopt(argc,argv,":bi:o"))!= -1){
+        switch (opt) {
+            case 'i':
+                strcpy(input,optarg);
+                break;
+            case 'o':
+                strcpy(output,optarg);
+                break;
+            case 'b':
+                 return 1;
+                break;
+            case '?':
+                printf("Unknown option: %c\n",optopt);
+                break;
+            case ':':
+                printf("Missing arg for %c\n",optopt);
+        }
+    }
+    return 1;
+}
 
 int padre(char* linea,char* file,int fd[2],int fd2[2]){
     write(fd[1],linea,strlen(linea)+1);
