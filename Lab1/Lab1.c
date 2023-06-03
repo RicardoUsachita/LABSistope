@@ -36,9 +36,8 @@ int main(int argc, char *argv[]){
     char linea[60];
 
     char* namefileSalida = argv[2];
-
-    while (fscanf(file,"%s",&linea) != EOF) {
-    // Eliminar el carácter de nueva línea al final de la línea
+    int i=0;
+    while (fscanf(file,"%s",&linea) == 1) {
         
         pid = fork();
         if (pid < 0) {
@@ -62,12 +61,12 @@ int main(int argc, char *argv[]){
 
             write(fd[1],linea,strlen(linea)+1);
 
-            int espera = waitpid(pid,NULL,1);
-            printf("El wait recibe %d y el pid del hijo es %d\n",espera,pid);
+            int status;
+            waitpid(pid,&status,0);
+            printf("el pid del hijo es %d y su status es %d\n",pid,status);
 
             int respuesta = escrituraArchivo(namefileSalida,linea,fd2);
             
-
             printf("La respuesta que recibe el padre es %d\n",respuesta);
             if(respuesta){
                 contadores[0] += 1;
@@ -75,6 +74,8 @@ int main(int argc, char *argv[]){
                 contadores[1] += 1;
             }
         }
+        i++;
+        printf("han ocurrido %d ciclos\n",i);
         
     }
     fclose(file);
