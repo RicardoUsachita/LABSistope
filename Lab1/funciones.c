@@ -9,9 +9,9 @@
 #include "funciones.h"
 
 int padre(char* linea,char* file,int fd[2],int fd2[2]){
-    write(fd[1],linea,sizeof(linea));
-    wait(NULL);
+    write(fd[1],linea,strlen(linea)+1);
     int respuesta = escrituraArchivo(file,linea,fd2);
+    return respuesta;
 }
 int escrituraArchivo(char* file,char* linea, int fd2[2]){
 
@@ -23,7 +23,7 @@ int escrituraArchivo(char* file,char* linea, int fd2[2]){
     }else{
         respuesta = "No";
     }
-    FILE* output = fopen(file,"w");
+    FILE* output = fopen(file,"a");
     fprintf(output,"%s %s\n", linea,respuesta);
     fclose(output);
     return respuestaHijo;
@@ -45,15 +45,20 @@ void hijo(int fd[2],int fd2[2]){
     close(fd2[0]);
     read(fd[0],buffer,sizeof(buffer));
 
+    printf("Lo que lee el hijo %s\n",buffer);
+
     int respuesta = checkEtapa1(buffer,0);
 
     write(fd2[1],&respuesta,sizeof(int));
     
+
+    exit(0);
 }
 
 int checkEtapa1(char linea[60],int pos){
     int respuesta = 0;
-    if(pos == 60){
+    printf("Etapa 1 Linea %s pos %d, letra %c\n",linea,pos,linea[pos]);
+    if(pos == 59){
         return respuesta;
     }
     if(linea[pos]=='G'){
@@ -62,12 +67,14 @@ int checkEtapa1(char linea[60],int pos){
     }else if (linea[pos] == 'A' || linea[pos] == 'C' || linea[pos] == 'T' ){
         return checkEtapa1(linea,pos+1);
     }
-    return 0;
+    else{
+        return 0;}
 }
 
 int checkEtapa2(char linea[60],int pos){
+    printf("Etapa 2 Linea %s pos %d, letra %c\n",linea,pos,linea[pos]);
     int respuesta = 0;
-    if(pos == 60){
+    if(pos == 59){
         return respuesta;
     }
     if(linea[pos]=='T'){
@@ -79,12 +86,14 @@ int checkEtapa2(char linea[60],int pos){
     }else if (linea[pos] == 'A' || linea[pos] == 'C'){
         return checkEtapa1(linea,pos+1);
     }
-    return 0;
+    else{
+        return 0;}
 }
 
 int checkEtapa3(char linea[60],int pos){
+    printf("Etapa 3 Linea %s pos %d, letra %c\n",linea,pos,linea[pos]);
     int respuesta = 0;
-    if(pos == 60){
+    if(pos == 59){
         return respuesta;
     }
     if(linea[pos]=='C'){
@@ -96,18 +105,22 @@ int checkEtapa3(char linea[60],int pos){
     }else if (linea[pos] == 'A'){
         return checkEtapa1(linea,pos+1);
     }
-    return 0;
+    else{
+        return 0;}
 }
 
 int checkEtapa4(char linea[60],int pos){
+    printf("Etapa 4 Linea %s pos %d, letra %c\n",linea,pos,linea[pos]);
     int respuesta = 1;
-    if(pos == 60){
+    if(pos == 59){
         return respuesta;
     }
     if(linea[pos] == 'A' || linea[pos] == 'C' || linea[pos] == 'T' || linea[pos] == 'G' ){
         return checkEtapa4(linea,pos+1);
     }
-    return 0;
+    else{
+        return 0;
+        }
 }
 
 
