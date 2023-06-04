@@ -11,8 +11,7 @@ int main(int argc, char *argv[]){
     char input[30] = "prueba_10.txt";
     char output[30] = "salida.txt";
     int flag = 0;
-    flag = validate(argc, argv, input, output);
-    printf("Inicia el programa: se leen %d entradas y un nombre de archivo %s\n", argc, input);
+    validate(argc, argv, input, output, &flag);
     if(flag) {
         FILE *file;
         file = fopen(input, "r");
@@ -20,6 +19,19 @@ int main(int argc, char *argv[]){
             printf("No se pudo abrir el archivo.\n");
             return 1;
         }
+        int contador = 0;
+        int capacidad = 0;
+        char ** arreglo = NULL;
+        char linea[60];
+        while (fscanf(file, "%s", linea) == 1){
+            if (contador >= capacidad) {
+                capacidad += 10;
+                arreglo = realloc(arreglo, capacidad * sizeof(char*));
+            }
+            arreglo[contador] = strdup(linea);
+            contador++;
+        }
+        fclose(file);
         int fd[2];
         int fd2[2];
         int contadores[2];
@@ -35,10 +47,7 @@ int main(int argc, char *argv[]){
         }
         int pid;
 
-        char linea[60];
-
-        int i = 0;
-        while (fscanf(file, "%s", linea) == 1) {
+        for (int i = 0; i < contador;i++) {
 
             pid = fork();
             if (pid < 0) {
@@ -50,33 +59,29 @@ int main(int argc, char *argv[]){
                 close(fd2[0]);
                 read(fd[0], buffer, sizeof(buffer));
 
-                printf("Lo que lee el hijo %s\n", buffer);
 
                 int respuesta = checkEtapa1(buffer, 0);
 
                 write(fd2[1], &respuesta, sizeof(int));
 
-                exit(0);
+                exit(1);
             } else {
-                printf("Funciones padre\n");
 
-                write(fd[1], linea, strlen(linea) + 1);
+                write(fd[1], arreglo[i], sizeof(char)*60);
 
-                int status;
-                waitpid(pid, &status, 0);
-                printf("el pid del hijo es %d y su status es %d\n", pid, status);
+                //int status;
+                //waitpid(pid, &status, 0);
+                //printf("el pid del hijo es %d y su status es %d\n", pid, status);
+                wait(NULL);
 
-                int respuesta = escrituraArchivo(output, linea, fd2);
+                int respuesta = escrituraArchivo(output, arreglo[i], fd2);
 
-                printf("La respuesta que recibe el padre es %d\n", respuesta);
                 if (respuesta) {
                     contadores[0] += 1;
                 } else {
                     contadores[1] += 1;
                 }
             }
-            i++;
-            printf("han ocurrido %d ciclos\n", i);
 
         }
         fclose(file);
