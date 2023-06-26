@@ -9,6 +9,7 @@
 //Descripción: Función recursiva que corresponde a la primera etapa en donde si lee una G se va directo
 //a la segunda etapa. Si llega al ultimo caracter retorna una respuesta, la cual es negativa.
 int checkEtapa1(char linea[60],int pos){
+    
     int respuesta = 0;
     if(pos == 59){
         return respuesta;

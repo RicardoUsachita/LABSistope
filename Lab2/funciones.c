@@ -51,7 +51,7 @@ int validate(int argc, char * argv[], char input[], char output[], char flag[], 
                 }
                 break;
             case 'b':
-                *flag = 1;
+                strcpy(flag,"1");
                 break;
             case '?':
                 printf("Case ?\n");

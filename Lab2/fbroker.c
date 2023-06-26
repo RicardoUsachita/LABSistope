@@ -7,43 +7,61 @@
 //Entradas Char* del nombre del archivo, int del numero de chunks, pipes, int de cant de workers
 //Salidas void
 //Descripcion se lee el archivo solicitado por el usuario, el contenido de este txt se almacena en un arreglo
-void leerTXT(char nombreArchivo[30], int num_chunks, int num_lineas, int fd[][2], int workers){
+int leerTXT(char nombreArchivo[30], int num_chunks, int num_lineas, int fd[][2], int workers){
     FILE* fp;
     fp= fopen(nombreArchivo,"r");
-    char string[150];
+    char string[60];
     int div = num_lineas/num_chunks;
     int resto = num_lineas - (num_chunks * div);
-    int i = 0;
-    int j = 0;
-    int k = 0;
-    int l = 0;
-    int m = 0;
-    while(fgets(string,150,fp)!=NULL){
+    //printf("div %s resto %s\n",div,resto);
+    int i = 0;//contador de lineas
+    int j = 0;//contador de workers
+    int k = 0;//contador de chunks
+    int m = 0;//
+    while(fscanf(fp,"%s",string)==1){
+        printf("contadores i %d, j %d, k %d, m %d\n",i,j,k,m);
         if(i == (num_lineas - resto) && resto > 0){
-            l = j;
-            while(m < resto){
-                write(fd[l][1], string, sizeof(string));
-                i++;
-                m++;
-            }
-        }
-        while(j < workers){
-            while(k < num_chunks) {
+            if(k < resto){
                 write(fd[j][1], string, sizeof(string));
-                i++;
                 k++;
+            
+            }else{
+                k=0;
             }
-            j++;
         }
-        if(j == workers){
-            j = 0;
+        if(j < workers){
+            printf("String en while leet txt %s \n",string);
+            if(k < num_chunks) {
+                write(fd[j][1], string, sizeof(string));
+                k++;
+
+            }
+            if(k == num_chunks){
+                j++;
+                k=0;
+            }
+            
         }
+        if(j==workers && i<num_lineas){
+            j=0;
+            m++;
+        }
+        i++;
+        
     }
-    printf("Lineas leidas = %d\n",i);
-    strcpy(string,"FIN");
+    printf("contadores al terminar i %d, j %d, k %d, m %d\n",i,j,k,m);
+
+    printf("Lineas leidas = %d div = %d resto = %d\n",i,div,resto);
+
+    strncpy(string,"FIN",sizeof(char)*4);
     for(int i=0;i<=workers;i++){
         write(fd[i][1],string,sizeof(string));
     }
+    fclose(fp);
+    if(m>0){
+        return workers;
+    }
+    return j;
 }
 
 //Entradas: char* file que corresponde al nombre del archivo, char* linea que corresponde a la linea que
@@ -51,30 +69,34 @@ void leerTXT(char nombreArchivo[30], int num_chunks, int num_lineas, int fd[][2]
 //Salidas: 0 o 1, estas representan si es que la linea leida por el hijo es o no una expresión regular.
 //Descripción: Función que lee la respuesta del hijo (si es que es o no expresión regular) y la escribe
 //en el archivo salida.
-int * escrituraArchivo(char* file,char** arreglo, int * linea, int * tamano, int fd[][2], int workers){
-    int * respuestasHijo =(int *)malloc(sizeof(int)*1000);
+void escrituraArchivo(char* file,char** arreglo, int * linea, int * tamano, int fd[][2], int workers, int num_chunks,int contadores[2]){
+    int * respuestasHijo =(int *)malloc(sizeof(int)*num_chunks);
     for(int i = 0;i < workers;i++) {
         read(fd[i][0], respuestasHijo, sizeof(respuestasHijo));
-        int* ptr = respuestasHijo; // Puntero al primer elemento del arreglo
-        while (*(ptr + 1) != '\0') {  // Avanza hasta el último elemento
-            ptr++;
+        for(int p = 0; p < num_chunks;p++){
+            printf("arreglo de respuestas p = %d respuesta = %d\n",p,respuestasHijo[p]);
         }
-        *tamano = *ptr;
-        for(int i = 0;i < *tamano-1;i++) {
-        char *respuesta;
-        if (respuestasHijo[i]) {
-            respuesta = "Si";
-        } else {
-            respuesta = "No";
-        }
-        FILE *output = fopen(file, "a");
-        fprintf(output, "%s %s\n", arreglo[*linea], respuesta);
-        printf("%s %s\n", arreglo[*linea], respuesta);
-        fclose(output);
-        *linea += 1;
-        }
+        
+        
+        //*tamano = respuestasHijo[num_chunks];
+        //printf("tamano %d \n", *tamano);
+        for(int i = 0;i < num_chunks;i++) {
+            char respuesta[3];
+            if (respuestasHijo[i]) {
+                strcpy(respuesta,"Si");
+                contadores[0]+=1;
+            } else {
+                strcpy(respuesta,"No");
+                contadores[1]+=1;
+            }
+
+            FILE *output = fopen(file, "a");
+            fprintf(output, "%s %s\n", arreglo[*linea], respuesta);
+
+            fclose(output);
+            *linea += 1;
+            }
     }
-    return respuestasHijo;
 }
 //Entradas: char* file que corresponde al nombre del archivo de salida, int* contadores que corresponde
 //a un arreglo de enteros donde estan la cantidad de lineas que si son expresiones regulares y la cantidad

@@ -21,7 +21,7 @@ int main(int argc, char * argv[]){
     int flag = atoi(argv[3]);
     FILE *file;
     file = fopen(input, "r");
-    printf("Estoy aquí");
+    printf("Estoy aquí brocer.c \n");
     if (file == NULL) {
         printf("No se pudo abrir el archivo.\n");
         return 1;
@@ -58,7 +58,7 @@ int main(int argc, char * argv[]){
             dup2(pipesEscritura[i][0], STDIN_FILENO);
             dup2(pipesLectura[i][1], 121);
             fflush(stdout);
-            ja = execlp("./worker", "./worker", argv[3], NULL);
+            ja = execlp("./worker", "./worker", argv[3], argv[5], NULL);
             if(ja==-1)
                 printf("error de execlp\n");
             exit(0);
@@ -66,21 +66,28 @@ int main(int argc, char * argv[]){
             close(pipesEscritura[i][0]);
     }
     //lee el txt (linea x linea)
-    leerTXT(input,num_chunks,contador,pipesEscritura,workers);
-    int * respuestas =(int*)malloc(sizeof(int) * 1000);
+    int trabajadores = leerTXT(input,num_chunks,contador,pipesEscritura,workers);
+    while((wpid=wait(&status))>0);
+    //int * respuestas = (int*)malloc(sizeof(int) * num_chunks);
     int line = 0;
     int tamano = 0;
-    while((wpid=wait(&status))>0);
-    for(int i = 0;i < contador;i++) {
-        respuestas = escrituraArchivo(output, arreglo, &line, &tamano, pipesEscritura, workers);
-        for(int j = 0;j < tamano;j++) {
+    
+    escrituraArchivo(output, arreglo, &line, &tamano, pipesLectura, trabajadores,num_chunks,contadores);
+
+    printf("contadores Si %d, No %d\n",contadores[0],contadores[1]);
+
+
+        /*for(int j = 0;j < tamano;j++) {
             if (respuestas[j]) {
                 contadores[0] += 1;
+                
             } else {
                 contadores[1] += 1;
             }
-        }
-    }
+        }*/
+
+  
+    printf("No hay for\n");
     escrituraContadores(output, contadores);
 
     for(int i = 0;i < contador;i++){
