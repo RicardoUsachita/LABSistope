@@ -10,7 +10,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4ded6920-ebdd-460e-8f02-78a6cf46ecc3" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/lab1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,6 +30,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
@@ -78,6 +79,8 @@
       <workItem from="1685512132420" duration="3847000" />
       <workItem from="1685826733639" duration="22000" />
       <workItem from="1685830320590" duration="9416000" />
+      <workItem from="1685845450286" duration="355000" />
+      <workItem from="1687643030997" duration="602000" />
     </task>
     <servers />
   </component>
