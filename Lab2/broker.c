@@ -39,6 +39,10 @@ int main(int argc, char * argv[]){
         contador++;
     }
     fclose(file);
+    int div = contador / num_chunks;
+    int resto = contador - (num_chunks * div);
+    char restoS[3];
+    snprintf(restoS, sizeof(restoS), "%d", resto);
     int contadores[2];
     contadores[0] = 0;
     contadores[1] = 0;
@@ -58,7 +62,7 @@ int main(int argc, char * argv[]){
             dup2(pipesEscritura[i][0], STDIN_FILENO);
             dup2(pipesLectura[i][1], 121);
             fflush(stdout);
-            ja = execlp("./worker", "./worker", argv[3], argv[5], NULL);
+            ja = execlp("./worker", "./worker", argv[3], argv[5], argv[4], restoS, NULL);
             if(ja==-1)
                 printf("error de execlp\n");
             exit(0);
@@ -66,13 +70,14 @@ int main(int argc, char * argv[]){
             close(pipesEscritura[i][0]);
     }
     //lee el txt (linea x linea)
-    int trabajadores = leerTXT(input,num_chunks,contador,pipesEscritura,workers);
+    int * trabajadores = leerTXT(input,num_chunks,contador,pipesEscritura,workers);
     while((wpid=wait(&status))>0);
+    int trabajador = trabajadores[0];
+    printf("Trabajador %d, Resto %d\n", trabajador, trabajadores[1]);
     //int * respuestas = (int*)malloc(sizeof(int) * num_chunks);
     int line = 0;
-    int tamano = 0;
     
-    escrituraArchivo(output, arreglo, &line, &tamano, pipesLectura, trabajadores,num_chunks,contadores);
+    escrituraArchivo(output, arreglo, &line, trabajadores[1], pipesLectura, trabajadores[0],num_chunks,contadores);
 
     printf("contadores Si %d, No %d\n",contadores[0],contadores[1]);
 
