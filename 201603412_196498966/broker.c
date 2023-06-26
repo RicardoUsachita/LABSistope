@@ -21,7 +21,6 @@ int main(int argc, char * argv[]){
     int flag = atoi(argv[3]);
     FILE *file;
     file = fopen(input, "r");
-    printf("Estoy aquí brocer.c \n");
     if (file == NULL) {
         printf("No se pudo abrir el archivo.\n");
         return 1;
@@ -73,27 +72,15 @@ int main(int argc, char * argv[]){
     int * trabajadores = leerTXT(input,num_chunks,contador,pipesEscritura,workers);
     while((wpid=wait(&status))>0);
     int trabajador = trabajadores[0];
-    printf("Trabajador %d, Resto %d\n", trabajador, trabajadores[1]);
-    //int * respuestas = (int*)malloc(sizeof(int) * num_chunks);
+    
     int line = 0;
     
-    escrituraArchivo(output, arreglo, &line, trabajadores[1], pipesLectura, trabajadores[0],num_chunks,contadores);
+    escrituraArchivo(output, arreglo, &line, trabajadores[1], pipesLectura, trabajadores[0],num_chunks,contadores,flag);
 
-    printf("contadores Si %d, No %d\n",contadores[0],contadores[1]);
-
-
-        /*for(int j = 0;j < tamano;j++) {
-            if (respuestas[j]) {
-                contadores[0] += 1;
-                
-            } else {
-                contadores[1] += 1;
-            }
-        }*/
+    
 
   
-    printf("No hay for\n");
-    escrituraContadores(output, contadores);
+    escrituraContadores(output, contadores, flag);
 
     for(int i = 0;i < contador;i++){
         free(arreglo[i]);

@@ -16,12 +16,10 @@ int main(int argc, char * argv[]){
 
     read(STDIN_FILENO,buffer, sizeof(char)*60);
     while (strcmp(buffer,"FIN")!=0) {
-        printf("Print buffer %s\n", buffer);
         fflush(stdout);
         //fflush(stdin);
         if(strcmp(buffer,"")!=0){
             int respuesta = checkEtapa1(buffer,0);
-            printf("Respuesta worker.c %d\n", respuesta);
             out[lineas] = respuesta;
             lineas++;
         }
@@ -30,7 +28,7 @@ int main(int argc, char * argv[]){
     if(lineas == resto){
         for(int i = 0;i < resto;i++){
             out2[i] = out[i];
-            printf("Salida Resto: %d\n", out2[i]);
+            
         }
         write(121, out2, sizeof(out2));
 

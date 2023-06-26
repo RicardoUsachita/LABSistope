@@ -4,8 +4,8 @@
 #include <string.h>
 #include "fbroker.h"
 
-//Entradas Char* del nombre del archivo, int del numero de chunks, pipes, int de cant de workers
-//Salidas void
+//Entradas Char* del nombre del archivo, int del numero de chunks, pipes, int de cant de workers.
+//Salidas int *, entrega un arreglo de enteros correspondiente a la cantidad de workers totales que se hicieron uso y al resto.
 //Descripcion se lee el archivo solicitado por el usuario, el contenido de este txt se almacena en un arreglo
 int * leerTXT(char nombreArchivo[30], int num_chunks, int num_lineas, int fd[][2], int workers){
     FILE* fp;
@@ -20,10 +20,9 @@ int * leerTXT(char nombreArchivo[30], int num_chunks, int num_lineas, int fd[][2
     int m = 0;//
     int * resultado =(int*)malloc(sizeof(int)*2);
     while(fscanf(fp,"%s",string)==1){
-        printf("contadores i %d, j %d, k %d, m %d\n",i,j,k,m);
         if(i >= (num_lineas - resto) && resto > 0){
             if(k < resto){
-                printf("String en if k < resto lee txt %s \n",string);
+                
                 write(fd[j][1], string, sizeof(string));
                 k++;
             
@@ -33,7 +32,7 @@ int * leerTXT(char nombreArchivo[30], int num_chunks, int num_lineas, int fd[][2
             }
         }
         else if(j < workers){
-            printf("String en while lee txt %s \n",string);
+            
             if(k < num_chunks) {
                 write(fd[j][1], string, sizeof(string));
                 k++;
@@ -52,9 +51,7 @@ int * leerTXT(char nombreArchivo[30], int num_chunks, int num_lineas, int fd[][2
         i++;
         
     }
-    printf("contadores al terminar i %d, j %d, k %d, m %d\n",i,j,k,m);
-
-    printf("Lineas leidas = %d div = %d resto = %d\n",i,div,resto);
+    
 
     strncpy(string,"FIN",sizeof(char)*4);
     for(int i=0;i<=workers;i++){
@@ -71,25 +68,27 @@ int * leerTXT(char nombreArchivo[30], int num_chunks, int num_lineas, int fd[][2
     return resultado;
 }
 
-//Entradas: char* file que corresponde al nombre del archivo, char* linea que corresponde a la linea que
-//se va a escribir, int fd2[2] es el pipe por el cual el padre lee.
-//Salidas: 0 o 1, estas representan si es que la linea leida por el hijo es o no una expresión regular.
+//Entradas: char* file que corresponde al nombre del archivo, char** arreglo que corresponde al arreglo en donde esta
+// guardado el contenido del archiv, char* linea que corresponde a la linea que
+//se va a escribir, int fd[][2] es el pipe por el cual el padre lee, int workers es la cantidad de hijos, int num_chunks
+// es la cantidad de chunks a leer por el hijo, int contadores[2] contador que se encarga de contar las expresiones que son
+// y que no son regulares y int flag que corresponde a la bandera para mostrar todo por pantalla.
+//Salidas: void.
 //Descripción: Función que lee la respuesta del hijo (si es que es o no expresión regular) y la escribe
 //en el archivo salida.
-void escrituraArchivo(char* file,char** arreglo, int * linea, int resto, int fd[][2], int workers, int num_chunks,int contadores[2]){
+void escrituraArchivo(char* file,char** arreglo, int * linea, int resto, int fd[][2], int workers, int num_chunks,int contadores[2],int flag){
     //int * respuestasHijo =(int *)malloc(sizeof(int)*num_chunks);
     //int * respuestasResto =(int *)malloc(sizeof(int)*resto);
     int respuestasHijo[num_chunks];
     int respuestasResto[resto];
-    printf("workers %d\n", workers);
     for(int i = 0;i < workers;i++) {
         if(i == workers - 1 && resto != 0){
             read(fd[i][0], respuestasResto, sizeof(respuestasResto));
             for (int j = 0; j < resto; j++) {
-                printf("Entre al Resto y tengo esto: %d\n", respuestasResto[j]);
+                
                 char respuesta[3];
                 if (respuestasResto[j]) {
-                    printf("Respuesta Resto %d\n", respuestasResto[j]);
+                    
                     strcpy(respuesta, "Si");
                     contadores[0] += 1;
                 } else {
@@ -98,6 +97,9 @@ void escrituraArchivo(char* file,char** arreglo, int * linea, int resto, int fd[
                 }
                 FILE *output = fopen(file, "a");
                 fprintf(output, "%s %s\n", arreglo[*linea], respuesta);
+                if(flag){
+                    printf("%s %s\n",arreglo[*linea],respuesta);
+                }
 
                 fclose(output);
                 *linea += 1;
@@ -116,6 +118,9 @@ void escrituraArchivo(char* file,char** arreglo, int * linea, int resto, int fd[
 
                 FILE *output = fopen(file, "a");
                 fprintf(output, "%s %s\n", arreglo[*linea], respuesta);
+                if(flag){
+                    printf("%s %s\n",arreglo[*linea],respuesta);
+                }
 
                 fclose(output);
                 *linea += 1;
@@ -125,19 +130,23 @@ void escrituraArchivo(char* file,char** arreglo, int * linea, int resto, int fd[
 }
 //Entradas: char* file que corresponde al nombre del archivo de salida, int* contadores que corresponde
 //a un arreglo de enteros donde estan la cantidad de lineas que si son expresiones regulares y la cantidad
-//de lineas que no son expresiones regulares.
+//de lineas que no son expresiones regulares y int flag que corresponde a la bander que indica si hay o no que mostrar
+// por pantalla.
 //Salidas: ninguna, sin embargo, hace un print del total de expresiones regulares, no regulares y
 //total de lineas leídas.
-void escrituraContadores(char* file, int* contadores){
+//Descripción: Función que guarda en el archivo el total de expresiones regulares, no regulares y
+//total de lineas leídas y si corresponde los printea.
+void escrituraContadores(char* file, int* contadores, int flag){
     int suma = contadores[0] + contadores[1];
     FILE* archivo = fopen(file,"a");
     fprintf(archivo,"\nTotal de expresiones que si son regulares %d \n",contadores[0]);
     fprintf(archivo,"Total de expresiones que no son regulares %d \n",contadores[1]);
     fprintf(archivo,"Total de lineas leídas %d \n",suma);
-    printf("\nTotal de expresiones que si son regulares %d \n",contadores[0]);
-    printf("Total de expresiones que no son regulares %d \n",contadores[1]);
-    printf("Total de lineas leídas %d \n",suma);
-
+    if(flag) {
+        printf("\nTotal de expresiones que si son regulares %d \n", contadores[0]);
+        printf("Total de expresiones que no son regulares %d \n", contadores[1]);
+        printf("Total de lineas leídas %d \n", suma);
+    }
     fclose(archivo);
 }
 

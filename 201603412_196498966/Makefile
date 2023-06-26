@@ -1,12 +1,14 @@
 CC=gcc
 cflags= -Wall -lm
-out=lab1
-#Pruebas
-#./lab1 -i prueba_10.txt -o salida.txt -b
-#./lab1 -i prueba_100.txt -o salida.txt -b
-#./lab1 -i prueba_500.txt -o salida.txt -b
-#./lab1 -i prueba_1000.txt -o salida.txt -b
+out=lab2
+outbroker=broker
+outworker=worker
+
 all:
-	$(CC) Lab1.c -o $(out) $(cflags)
+	$(CC) broker.c -o $(outbroker)
+	$(CC) worker.c -o $(outworker)
+	$(CC) lab2.c -o $(out) $(cflags)
 clean:
 	rm $(out)
+fullclean:
+	rm -f $(out) $(outbroker) $(outworker)
